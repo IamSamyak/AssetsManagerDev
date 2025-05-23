@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\animation.png" />
+    <None Remove="Resources\svg.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\animation.png" />
+    <Resource Include="Resources\svg.png" />
+  </ItemGroup>
+
+</Project>
