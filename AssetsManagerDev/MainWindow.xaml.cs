@@ -33,6 +33,7 @@ namespace AssetsManager
 
             TopControlsPanel.AddAssetClicked += AddAsset_Click;
             TopControlsPanel.SearchBoxTextChanged += SearchBox_TextChanged;
+            RefreshAssetList();
         }
 
         private void EnsureAssetStorageInitialized()
