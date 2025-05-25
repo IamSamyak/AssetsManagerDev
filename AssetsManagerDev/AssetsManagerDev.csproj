@@ -14,6 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Resources\animation.png" />
     <Resource Include="Resources\svg.png" />
   </ItemGroup>

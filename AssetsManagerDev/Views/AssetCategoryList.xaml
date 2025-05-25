@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="AssetsManagerDev.Views.AssetCategoryList"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="Auto" Width="Auto">
+    <ListBox x:Name="CategoryListBox"
+             SelectionMode="Multiple"
+             Background="White"
+             BorderBrush="LightGray"
+             BorderThickness="1"
+             Padding="10"
+             SelectionChanged="CategoryListBox_SelectionChanged">
+        <ListBoxItem Tag="animation">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="/Resources/animation.png" Width="24" Height="24" Margin="0,0,10,0"/>
+                <TextBlock Text="Animations"/>
+            </StackPanel>
+        </ListBoxItem>
+        <ListBoxItem Tag="svg">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="/Resources/svg.png" Width="24" Height="24" Margin="0,0,10,0"/>
+                <TextBlock Text="SVGs"/>
+            </StackPanel>
+        </ListBoxItem>
+        <ListBoxItem Tag="png">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="/Resources/animation.png" Width="24" Height="24" Margin="0,0,10,0"/>
+                <TextBlock Text="PNGs"/>
+            </StackPanel>
+        </ListBoxItem>
+        <ListBoxItem Tag="image">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="/Resources/animation.png" Width="24" Height="24" Margin="0,0,10,0"/>
+                <TextBlock Text="Images"/>
+            </StackPanel>
+        </ListBoxItem>
+        <ListBoxItem Tag="gif">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="/Resources/animation.png" Width="24" Height="24" Margin="0,0,10,0"/>
+                <TextBlock Text="GIFs"/>
+            </StackPanel>
+        </ListBoxItem>
+    </ListBox>
+</UserControl>
