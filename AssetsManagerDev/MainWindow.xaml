@@ -3,75 +3,241 @@
         xmlns:views="clr-namespace:AssetsManagerDev.Views"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Asset Manager" Height="600" Width="900"
-        Background="#F4F7FB" WindowStartupLocation="CenterScreen">
+        Background="#F4F7FB" WindowStartupLocation="CenterScreen"
+        WindowStyle="None" AllowsTransparency="True">
 
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <!-- App Title -->
-            <RowDefinition Height="*"/>
-            <!-- Rest of the content -->
-        </Grid.RowDefinitions>
-
-        <!-- App Title -->
-        <views:AppTitleControl Grid.Row="0" />
-
-        <!-- Main Content Area with Background and Rounded Corners -->
-        <Border Grid.Row="1" Background="#FEFFFE" CornerRadius="10" Padding="0" Margin="0,10,0,0">
+    <Grid>
+        <!-- Custom Header -->
+        <Border Background="#E9EEF6" Height="45" VerticalAlignment="Top" CornerRadius="10,10,0,0" MouseLeftButtonDown="Window_MouseLeftButtonDown">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="200"/>
-                    <!-- Thin separator line column -->
-                    <ColumnDefinition Width="3"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Asset Categories List -->
-                <views:AssetCategoryList Grid.Column="0" SelectedCategoriesChanged="CategoryListControl_SelectedCategoriesChanged" />
+                <TextBlock Text="Asset Manager"
+                           VerticalAlignment="Center"
+                           Margin="16,0,0,0"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           Foreground="#2C3E50"/>
 
-                <!-- Thin vertical separator line with #F4F7FB -->
-                <Border Grid.Column="1" Background="#F4F7FB" />
+                <!-- Minimize Button -->
+                <Button Grid.Column="1"
+                        Width="40" Height="40"
+                        Content="🗕"
+                        ToolTip="Minimize"
+                        Background="Transparent"
+                        BorderBrush="{x:Null}"
+                        Foreground="#666"
+                        FontSize="14"
+                        Click="Minimize_Click"/>
 
-                <!-- Right side (TopControls on top, then assets and preview) -->
-                <Grid Grid.Column="2">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <!-- TopControls -->
-                        <RowDefinition Height="*"/>
-                        <!-- Assets + Preview -->
-                    </Grid.RowDefinitions>
+                <!-- Maximize/Restore Button -->
+                <Button Grid.Column="2"
+                        Width="40" Height="40"
+                        Content="🗖"
+                        ToolTip="Maximize / Restore"
+                        Background="Transparent"
+                        BorderBrush="{x:Null}"
+                        Foreground="#666"
+                        FontSize="14"
+                        Click="MaximizeRestore_Click"/>
 
-                    <!-- Top Controls -->
-                    <views:TopControls Grid.Row="0"
-                               x:Name="TopControlsPanel"
-                               VerticalAlignment="Center"
-                               AddAssetClicked="AddAsset_Click"
-                               SearchBoxTextChanged="SearchBox_TextChanged"/>
-
-                    <!-- Assets + Preview Section -->
-                    <Border Grid.Row="1" Background="#FEFFFE" Padding="10" CornerRadius="5" Margin="0,10,0,0">
-                        <Grid Name="AssetsGrid">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Scrollable WrapPanel for assets -->
-                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-                                <WrapPanel Name="AssetsWrapPanel" Orientation="Horizontal" ItemWidth="120" ItemHeight="150" />
-                            </ScrollViewer>
-
-                            <!-- Preview Panel -->
-                            <Grid Name="PreviewGrid" Grid.Row="1" Margin="0,10,0,0">
-                                <Image Name="ImagePreview" Stretch="Uniform" Visibility="Collapsed"/>
-                                <TextBlock Name="SvgPlaceholder" Text="SVG Preview Not Implemented"
-                                           Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           Visibility="Collapsed" FontStyle="Italic"/>
-                            </Grid>
-                        </Grid>
-                    </Border>
-                </Grid>
+                <!-- Close Button -->
+                <Button Grid.Column="3"
+                        Width="40" Height="40"
+                        Content="✖"
+                        ToolTip="Close"
+                        Background="Transparent"
+                        BorderBrush="{x:Null}"
+                        Foreground="#D9534F"
+                        FontSize="14"
+                        Click="Close_Click"/>
             </Grid>
+        </Border>
+
+        <!-- Main Content Below Header -->
+        <Grid Margin="20,60,20,20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Removed Duplicate Header: AppTitleControl -->
+
+            <!-- Main Content Area -->
+            <Border Grid.Row="1" Background="#FEFFFE" CornerRadius="10" Padding="0" Margin="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="2"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left Category Panel -->
+                    <views:AssetCategoryList Grid.Column="0" SelectedCategoriesChanged="CategoryListControl_SelectedCategoriesChanged"/>
+                    <Border Grid.Column="1" Background="#F4F7FB"/>
+
+                    <!-- Right Panel -->
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Top Controls -->
+                        <views:TopControls Grid.Row="0"
+                                           x:Name="TopControlsPanel"
+                                           VerticalAlignment="Center"
+                                           AddAssetClicked="AddAsset_Click"
+                                           SearchBoxTextChanged="SearchBox_TextChanged"/>
+
+                        <!-- Assets List Section -->
+                        <Border Grid.Row="1"
+                                Background="#FEFFFE"
+                                Padding="8"
+                                CornerRadius="10"
+                                Margin="0,10,0,0"
+                                ClipToBounds="True">
+                            <Grid Name="AssetsGrid">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                                    <WrapPanel Name="AssetsWrapPanel"
+                                               Orientation="Horizontal"
+                                               ItemWidth="130"
+                                               ItemHeight="170"/>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Modal/Preview Panel -->
+        <Border Name="PreviewGrid"
+                Visibility="Collapsed"
+                Background="#88000000"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Panel.ZIndex="999"
+                ClipToBounds="True">
+
+            <Border Width="450"
+                    Height="250"
+                    Background="White"
+                    CornerRadius="10"
+                    Padding="20"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+                <Grid>
+                    <!-- Modal Close -->
+                    <Button Content="✖"
+                            Width="30"
+                            Height="30"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Background="Transparent"
+                            BorderBrush="{x:Null}"
+                            Foreground="Gray"
+                            FontSize="16"
+                            Click="ClosePreview_Click"
+                            ToolTip="Close"/>
+
+                    <!-- Modal Content -->
+                    <Grid Margin="0,40,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Image Name="ImagePreview"
+                               Height="250"
+                               Stretch="Uniform"
+                               Grid.Column="0"
+                               VerticalAlignment="Top"
+                               Margin="0,0,20,0"/>
+
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Top"
+                                    Width="250">
+                            <TextBlock Name="ImageNameTextBlock"
+                                       FontWeight="Bold"
+                                       FontSize="14"
+                                       Margin="0,0,0,5"/>
+                            <TextBlock Name="ImageSizeTextBlock"
+                                       FontSize="12"
+                                       Foreground="Gray"
+                                       Margin="0,0,0,5"/>
+                            <TextBlock Name="ImageFormatTextBlock"
+                                       FontSize="12"
+                                       Foreground="Gray"
+                                       Margin="0,0,0,5"/>
+                            <TextBlock Name="ImageFileSizeTextBlock"
+                                       FontSize="12"
+                                       Foreground="Gray"
+                                       Margin="0,0,0,5"/>
+
+                            <!-- Snackbar -->
+                            <TextBlock x:Name="SnackbarText"
+                                       Visibility="Collapsed"
+                                       Background="Black"
+                                       Foreground="White"
+                                       Padding="6"
+                                       Margin="0,0,0,10"
+                                       Text="File copied!"
+                                       TextAlignment="Center"
+                                       HorizontalAlignment="Left"
+                                       Width="150"
+                                       Opacity="0.9">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect BlurRadius="5" ShadowDepth="2" Opacity="0.3"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+
+                            <!-- Copy Button -->
+                            <Button Content="Copy Asset"
+                                    Width="150"
+                                    Height="25"
+                                    Click="CopyFile_Click"
+                                    Background="#FFF0F0F0"
+                                    BorderBrush="#FFC0C0C0"
+                                    BorderThickness="1"
+                                    Foreground="Black"
+                                    Padding="6,2"
+                                    FontWeight="SemiBold">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="5"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- SVG Placeholder -->
+                    <TextBlock Name="SvgPlaceholder"
+                               Text="SVG Preview Not Implemented"
+                               Foreground="Gray"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Visibility="Collapsed"
+                               FontStyle="Italic"/>
+                </Grid>
+            </Border>
         </Border>
     </Grid>
 </Window>

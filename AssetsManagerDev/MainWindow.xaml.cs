@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
 namespace AssetsManager
@@ -23,6 +24,7 @@ namespace AssetsManager
 
         private List<string> selectedCategories = new();
         private readonly AssetDatabaseManager dbManager;
+        private string _currentPreviewFilePath;
 
         public MainWindow()
         {
@@ -87,6 +89,28 @@ namespace AssetsManager
                 Application.Current.Shutdown();
             }
         }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == MouseButtonState.Pressed)
+                this.DragMove();
+        }
+
+        private void Minimize_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void MaximizeRestore_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = (this.WindowState == WindowState.Maximized) ? WindowState.Normal : WindowState.Maximized;
+        }
+
+        private void Close_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
 
         private void AddAsset_Click(object sender, RoutedEventArgs e)
         {
@@ -205,7 +229,6 @@ namespace AssetsManager
             var stackPanel = new StackPanel
             {
                 Width = 120,
-                Height = 150,
                 Margin = new Thickness(5),
                 Cursor = System.Windows.Input.Cursors.Hand
             };
@@ -252,7 +275,7 @@ namespace AssetsManager
                 TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.Wrap,
                 FontSize = 12,
-                Margin = new Thickness(5, 0, 5, 0)
+                //Margin = new Thickness(5, 0, 5, 0)
             };
 
             stackPanel.Children.Add(image);
@@ -267,31 +290,111 @@ namespace AssetsManager
             return stackPanel;
         }
 
-        private void ShowAssetPreview(Asset asset)
+        private async void CopyFile_Click(object sender, RoutedEventArgs e)
         {
-            if (asset == null || string.IsNullOrEmpty(asset.FilePath) || !File.Exists(asset.FilePath))
-                return;
-
-            string extension = Path.GetExtension(asset.FilePath).ToLower();
-
-            if (extension == ".png" || extension == ".jpg" || extension == ".jpeg")
+            if (File.Exists(_currentPreviewFilePath))
             {
-                ImagePreview.Source = new BitmapImage(new Uri(asset.FilePath));
-                ImagePreview.Visibility = Visibility.Visible;
-                SvgPlaceholder.Visibility = Visibility.Collapsed;
-            }
-            else if (extension == ".svg")
+                try
+                {
+                    var fileCollection = new System.Collections.Specialized.StringCollection
             {
-                ImagePreview.Visibility = Visibility.Collapsed;
-                SvgPlaceholder.Visibility = Visibility.Visible;
-                SvgPlaceholder.Text = $"[Preview SVG: {Path.GetFileName(asset.FilePath)}]";
+                _currentPreviewFilePath
+            };
+                    Clipboard.SetFileDropList(fileCollection);
+
+                    // Show snackbar notification instead of MessageBox
+                    SnackbarText.Visibility = Visibility.Visible;
+
+                    await Task.Delay(2000); // Show for 2 seconds
+
+                    SnackbarText.Visibility = Visibility.Collapsed;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to copy file to clipboard: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             else
             {
-                ImagePreview.Visibility = Visibility.Collapsed;
-                SvgPlaceholder.Visibility = Visibility.Visible;
-                SvgPlaceholder.Text = "Unsupported file format.";
+                MessageBox.Show("File does not exist or path is invalid.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
-}
+
+
+        private void ClosePreview_Click(object sender, RoutedEventArgs e)
+        {
+            PreviewGrid.Visibility = Visibility.Collapsed;
+            ImagePreview.Source = null;
+            SvgPlaceholder.Visibility = Visibility.Collapsed;
+        }
+
+
+        private void ShowAssetPreview(Asset asset)
+        {
+            string ext = Path.GetExtension(asset.FilePath).ToLower();
+            _currentPreviewFilePath = asset.FilePath;
+
+            // Get file format (extension without dot)
+            string fileFormat = ext.StartsWith(".") ? ext.Substring(1).ToUpper() : ext.ToUpper();
+
+            // Get file size
+            string fileSizeText = "";
+            try
+            {
+                FileInfo fileInfo = new FileInfo(asset.FilePath);
+                long fileSizeInBytes = fileInfo.Length;
+
+                if (fileSizeInBytes >= 1024 * 1024)
+                {
+                    fileSizeText = $"{(fileSizeInBytes / (1024.0 * 1024.0)):0.##} MB";
+                }
+                else
+                {
+                    fileSizeText = $"{(fileSizeInBytes / 1024.0):0.##} KB";
+                }
+            }
+            catch
+            {
+                fileSizeText = "Unknown size";
+            }
+
+            ImageFormatTextBlock.Text = $"File Format: {fileFormat}";
+            ImageFileSizeTextBlock.Text = $"File Size: {fileSizeText}";
+
+            if (ext == ".svg")
+            {
+                ImagePreview.Visibility = Visibility.Collapsed;
+                SvgPlaceholder.Visibility = Visibility.Visible;
+
+                ImageNameTextBlock.Text = asset.DisplayName;
+                ImageSizeTextBlock.Text = "SVG format – preview not supported.";
+                PreviewGrid.Visibility = Visibility.Visible;
+                return;
+            }
+
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(asset.FilePath, UriKind.Absolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+
+                ImagePreview.Source = bitmap;
+                ImagePreview.Visibility = Visibility.Visible;
+                SvgPlaceholder.Visibility = Visibility.Collapsed;
+
+                ImageNameTextBlock.Text = asset.DisplayName;
+                ImageSizeTextBlock.Text = $"Dimensions: {bitmap.PixelWidth} x {bitmap.PixelHeight}";
+                ImagePreview.Tag = bitmap;
+
+                PreviewGrid.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to load image: {ex.Message}");
+            }
+        }
+
+    }
 }
