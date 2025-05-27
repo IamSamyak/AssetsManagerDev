@@ -8,13 +8,17 @@ A WPF-based desktop application for managing and organizing different types of d
 
 - 📂 Supports common asset formats: `.json` (Lottie), `.svg`, `.png`, `.jpg`, `.jpeg`, `.gif`
 - 🔍 Search assets based on their type or name
-- 🏷️ Automatically categorizes files by extension:
-  - `.json` → animations
-  - `.svg` → svg
-  - `.png` → png
-  - `.jpg` / `.jpeg` → jpg
-  - `.gif` → gif
-  - any other → other
+- 🏷️ Automatically categorizes files by extension
 - 🧾 Supports multiple assets with the same name
 - 📁 Easy asset addition and management
 - ✅ Clean WPF user interface
+
+---
+
+## 🖼️ Screenshots
+
+### 🧭 Main Screen
+
+<img src="MainScreen.png" alt="Main Screen" width="800"/>
+
+
