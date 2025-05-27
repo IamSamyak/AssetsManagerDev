@@ -10,15 +10,25 @@
 
   <ItemGroup>
     <None Remove="Resources\animation.png" />
+    <None Remove="Resources\gif.png" />
+    <None Remove="Resources\image.png" />
+    <None Remove="Resources\png.png" />
     <None Remove="Resources\svg.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="LottieSharp" Version="2.4.2" />
+    <PackageReference Include="SharpVectors" Version="1.8.4.2" />
+    <PackageReference Include="SharpVectors.Wpf" Version="1.8.4.2" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
+    <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Resources\animation.png" />
+    <Resource Include="Resources\gif.png" />
+    <Resource Include="Resources\image.png" />
+    <Resource Include="Resources\png.png" />
     <Resource Include="Resources\svg.png" />
   </ItemGroup>
 

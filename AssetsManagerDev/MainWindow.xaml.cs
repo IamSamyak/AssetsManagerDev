@@ -1,15 +1,18 @@
 ﻿using AssetsManager.Data;
 using AssetsManager.Models;
 using AssetsManagerDev.Views;
+using LottieSharp.WPF;
 using Microsoft.Win32;
+using SharpVectors.Converters;
+using SharpVectors.Renderers.Wpf;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using WpfAnimatedGif;
 
 namespace AssetsManager
 {
@@ -243,7 +246,7 @@ namespace AssetsManager
 
             string ext = Path.GetExtension(asset.FilePath).ToLower();
 
-            if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif")
+            if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
             {
                 try
                 {
@@ -259,10 +262,48 @@ namespace AssetsManager
                     // Ignore load errors or set a placeholder image
                 }
             }
+            else if (ext == ".gif")
+            {
+                try
+                {
+                    var gifImage = new BitmapImage();
+                    gifImage.BeginInit();
+                    gifImage.UriSource = new Uri(asset.FilePath, UriKind.Absolute);
+                    gifImage.CacheOption = BitmapCacheOption.OnLoad;
+                    gifImage.EndInit();
+
+                    ImageBehavior.SetAnimatedSource(image, gifImage); // Enable GIF animation
+                }
+                catch
+                {
+                    // Ignore errors or set a placeholder image
+                }
+            }
             else if (ext == ".svg")
             {
-                // For SVG you could show a placeholder or handle SVG rendering if you want
-                image.Source = null; // or set a placeholder image
+                var svgViewbox = new SharpVectors.Converters.SvgViewbox
+                {
+                    Width = 100,
+                    Height = 100,
+                    Stretch = System.Windows.Media.Stretch.Uniform
+                };
+                svgViewbox.Source = new Uri(asset.FilePath, UriKind.Absolute);
+                stackPanel.Children.Add(svgViewbox);
+            }
+            else if (ext == ".json")
+            {
+                var lottieView = new LottieAnimationView
+                {
+                    Width = 100,
+                    Height = 100,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    AutoPlay = true,
+                    FileName = asset.FilePath, // Load the Lottie JSON file
+                    RepeatCount = -1 // Enable infinite looping
+                };
+
+                stackPanel.Children.Add(lottieView);
             }
             else
             {
@@ -275,13 +316,11 @@ namespace AssetsManager
                 TextAlignment = TextAlignment.Center,
                 TextWrapping = TextWrapping.Wrap,
                 FontSize = 12,
-                //Margin = new Thickness(5, 0, 5, 0)
             };
 
             stackPanel.Children.Add(image);
             stackPanel.Children.Add(textBlock);
 
-            // Add click event to select the asset (like your current ListBox selection)
             stackPanel.MouseLeftButtonUp += (s, e) =>
             {
                 ShowAssetPreview(asset);
@@ -328,73 +367,133 @@ namespace AssetsManager
             SvgPlaceholder.Visibility = Visibility.Collapsed;
         }
 
+private void ShowAssetPreview(Asset asset)
+    {
+        string ext = Path.GetExtension(asset.FilePath).ToLower();
+        _currentPreviewFilePath = asset.FilePath;
 
-        private void ShowAssetPreview(Asset asset)
+        // Get file format (extension without dot)
+        string fileFormat = ext.StartsWith(".") ? ext.Substring(1).ToUpper() : ext.ToUpper();
+
+        // Get file size
+        string fileSizeText = "";
+        try
         {
-            string ext = Path.GetExtension(asset.FilePath).ToLower();
-            _currentPreviewFilePath = asset.FilePath;
+            FileInfo fileInfo = new FileInfo(asset.FilePath);
+            long fileSizeInBytes = fileInfo.Length;
 
-            // Get file format (extension without dot)
-            string fileFormat = ext.StartsWith(".") ? ext.Substring(1).ToUpper() : ext.ToUpper();
+            if (fileSizeInBytes >= 1024 * 1024)
+            {
+                fileSizeText = $"{(fileSizeInBytes / (1024.0 * 1024.0)):0.##} MB";
+            }
+            else
+            {
+                fileSizeText = $"{(fileSizeInBytes / 1024.0):0.##} KB";
+            }
+        }
+        catch
+        {
+            fileSizeText = "Unknown size";
+        }
 
-            // Get file size
-            string fileSizeText = "";
+        ImageFormatTextBlock.Text = $"File Format: {fileFormat}";
+        ImageFileSizeTextBlock.Text = $"File Size: {fileSizeText}";
+
+        // Handle SVG files
+        if (ext == ".svg")
+        {
+            ImagePreview.Visibility = Visibility.Collapsed;
+            GifPlaceholder.Visibility = Visibility.Collapsed;
+            SvgPlaceholder.Visibility = Visibility.Visible;
+            SvgPlaceholder.Children.Clear();
+
+            var svgViewbox = new SvgViewbox
+            {
+                Width = 250,
+                Height = 250,
+                Stretch = System.Windows.Media.Stretch.Uniform
+            };
+            svgViewbox.Source = new Uri(asset.FilePath, UriKind.Absolute);
+            SvgPlaceholder.Children.Add(svgViewbox);
+
+            ImageNameTextBlock.Text = asset.DisplayName;
+            ImageSizeTextBlock.Text = "SVG format – scalable vector preview supported.";
+            PreviewGrid.Visibility = Visibility.Visible;
+            return;
+        }
+
+        // Handle GIF files
+        if (ext == ".gif")
+        {
+            ImagePreview.Visibility = Visibility.Collapsed;
+            SvgPlaceholder.Visibility = Visibility.Collapsed;
+            GifPlaceholder.Visibility = Visibility.Visible;
+            GifPlaceholder.Source = null;
+
             try
             {
-                FileInfo fileInfo = new FileInfo(asset.FilePath);
-                long fileSizeInBytes = fileInfo.Length;
+                var gifImage = new BitmapImage();
+                gifImage.BeginInit();
+                gifImage.UriSource = new Uri(asset.FilePath, UriKind.Absolute);
+                gifImage.CacheOption = BitmapCacheOption.OnLoad;
+                gifImage.EndInit();
 
-                if (fileSizeInBytes >= 1024 * 1024)
-                {
-                    fileSizeText = $"{(fileSizeInBytes / (1024.0 * 1024.0)):0.##} MB";
-                }
-                else
-                {
-                    fileSizeText = $"{(fileSizeInBytes / 1024.0):0.##} KB";
-                }
-            }
-            catch
-            {
-                fileSizeText = "Unknown size";
-            }
-
-            ImageFormatTextBlock.Text = $"File Format: {fileFormat}";
-            ImageFileSizeTextBlock.Text = $"File Size: {fileSizeText}";
-
-            if (ext == ".svg")
-            {
-                ImagePreview.Visibility = Visibility.Collapsed;
-                SvgPlaceholder.Visibility = Visibility.Visible;
+                ImageBehavior.SetAnimatedSource(GifPlaceholder, gifImage);
 
                 ImageNameTextBlock.Text = asset.DisplayName;
-                ImageSizeTextBlock.Text = "SVG format – preview not supported.";
+                ImageSizeTextBlock.Text = "Animated GIF preview supported.";
                 PreviewGrid.Visibility = Visibility.Visible;
                 return;
             }
-
-            try
-            {
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.UriSource = new Uri(asset.FilePath, UriKind.Absolute);
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-
-                ImagePreview.Source = bitmap;
-                ImagePreview.Visibility = Visibility.Visible;
-                SvgPlaceholder.Visibility = Visibility.Collapsed;
-
-                ImageNameTextBlock.Text = asset.DisplayName;
-                ImageSizeTextBlock.Text = $"Dimensions: {bitmap.PixelWidth} x {bitmap.PixelHeight}";
-                ImagePreview.Tag = bitmap;
-
-                PreviewGrid.Visibility = Visibility.Visible;
-            }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to load image: {ex.Message}");
+                MessageBox.Show($"Failed to load GIF: {ex.Message}");
             }
         }
 
+        // Handle Lottie JSON files
+        if (ext == ".json")
+        {
+            ImagePreview.Visibility = Visibility.Collapsed;
+            SvgPlaceholder.Visibility = Visibility.Collapsed;
+            GifPlaceholder.Visibility = Visibility.Collapsed;
+            LottiePlaceholder.Visibility = Visibility.Visible;
+            LottiePlaceholder.FileName = asset.FilePath; // Set Lottie JSON file
+            LottiePlaceholder.AutoPlay = true;
+            LottiePlaceholder.RepeatCount = -1;
+
+            ImageNameTextBlock.Text = asset.DisplayName;
+            ImageSizeTextBlock.Text = "Lottie JSON animation preview supported.";
+            PreviewGrid.Visibility = Visibility.Visible;
+            return;
+        }
+
+        // Handle other image formats (PNG, JPG, etc.)
+        try
+        {
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(asset.FilePath, UriKind.Absolute);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+
+            ImagePreview.Source = bitmap;
+            ImagePreview.Visibility = Visibility.Visible;
+            SvgPlaceholder.Visibility = Visibility.Collapsed;
+            GifPlaceholder.Visibility = Visibility.Collapsed;
+            LottiePlaceholder.Visibility = Visibility.Collapsed;
+
+            ImageNameTextBlock.Text = asset.DisplayName;
+            ImageSizeTextBlock.Text = $"Dimensions: {bitmap.PixelWidth} x {bitmap.PixelHeight}";
+            ImagePreview.Tag = bitmap;
+
+            PreviewGrid.Visibility = Visibility.Visible;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to load image: {ex.Message}");
+        }
     }
+
+}
 }

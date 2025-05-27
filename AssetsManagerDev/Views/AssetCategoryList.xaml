@@ -54,19 +54,19 @@
             </ListBoxItem>
             <ListBoxItem Tag="png">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="/Resources/animation.png" Width="24" Height="24" Margin="0,0,10,0"/>
+                    <Image Source="/Resources/png.png" Width="24" Height="24" Margin="0,0,10,0"/>
                     <TextBlock Text="PNGs"/>
                 </StackPanel>
             </ListBoxItem>
             <ListBoxItem Tag="image">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="/Resources/animation.png" Width="24" Height="24" Margin="0,0,10,0"/>
+                    <Image Source="/Resources/image.png" Width="24" Height="24" Margin="0,0,10,0"/>
                     <TextBlock Text="Images"/>
                 </StackPanel>
             </ListBoxItem>
             <ListBoxItem Tag="gif">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="/Resources/animation.png" Width="24" Height="24" Margin="0,0,10,0"/>
+                    <Image Source="/Resources/gif.png" Width="24" Height="24" Margin="0,0,10,0"/>
                     <TextBlock Text="GIFs"/>
                 </StackPanel>
             </ListBoxItem>
